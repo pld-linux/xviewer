@@ -6,13 +6,13 @@
 Summary:	Image viewer which supports many formats
 Summary(pl.UTF-8):	Przeglądarka obrazów obsługująca wiele formatów
 Name:		xviewer
-Version:	3.4.8
+Version:	3.4.11
 Release:	1
 License:	GPL v2+
 Group:		X11/Applications/Graphics
 #Source0Download: https://github.com/linuxmint/xviewer/tags
 Source0:	https://github.com/linuxmint/xviewer/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	bc1db6b1fd308ed595cf38491ab9fa4b
+# Source0-md5:	62aabaaf04402a465c89c44e7905bb8c
 URL:		https://github.com/linuxmint/xviewer
 BuildRequires:	cinnamon-desktop-devel >= 3.2.0
 BuildRequires:	docbook-dtd412-xml
