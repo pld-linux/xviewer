@@ -2,17 +2,19 @@
 # Conditional build:
 %bcond_without	apidocs	# API documentation
 %bcond_without	librsvg	# SVG scaling using librsvg
+%bcond_with	gir2	# girepository-2/libpeas 1.38 instead of girepository-1/libpeas 1.36
 
 Summary:	Image viewer which supports many formats
 Summary(pl.UTF-8):	Przeglądarka obrazów obsługująca wiele formatów
 Name:		xviewer
-Version:	3.4.11
+Version:	3.4.16
 Release:	1
 License:	GPL v2+
 Group:		X11/Applications/Graphics
 #Source0Download: https://github.com/linuxmint/xviewer/tags
 Source0:	https://github.com/linuxmint/xviewer/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	62aabaaf04402a465c89c44e7905bb8c
+# Source0-md5:	0f5a0cd5f0b35ad52a47f32ed79ef508
+Patch0:		%{name}-girepository2.patch
 URL:		https://github.com/linuxmint/xviewer
 BuildRequires:	cinnamon-desktop-devel >= 3.2.0
 BuildRequires:	docbook-dtd412-xml
@@ -20,14 +22,21 @@ BuildRequires:	exempi-devel >= 1.99.5
 BuildRequires:	gdk-pixbuf2-devel >= 2.19.1
 BuildRequires:	gettext-tools >= 0.19.7
 BuildRequires:	glib2-devel >= 1:2.38.0
-#BuildRequires:	gobject-introspection-devel >= 0.10.0
+%{!?with_gir2:BuildRequires:	gobject-introspection-devel >= 0.10.0}
 BuildRequires:	gtk+3-devel >= 3.0
 %{?with_apidocs:BuildRequires:	gtk-doc >= 1.16}
 BuildRequires:	lcms2-devel >= 2
 BuildRequires:	libexif-devel >= 1:0.6.14
 BuildRequires:	libjpeg-devel >= 8
+%if %{with gir2}
+BuildRequires:	libpeas-devel >= 1.38
+BuildRequires:	libpeas-gtk-devel >= 1.38
+%else
 BuildRequires:	libpeas-devel >= 0.7.4
+BuildRequires:	libpeas-devel < 1.38
 BuildRequires:	libpeas-gtk-devel >= 0.7.4
+BuildRequires:	libpeas-gtk-devel < 1.38
+%endif
 BuildRequires:	libportal-devel >= 0.5
 BuildRequires:	libportal-gtk3-devel >= 0.5
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2.36.2}
@@ -51,8 +60,13 @@ Requires:	glib2 >= 1:2.38.0
 Requires:	gtk+3 >= 3.0
 Requires:	hicolor-icon-theme
 Requires:	libexif >= 1:0.6.14
+%if %{with gir2}
+Requires:	libpeas >= 1.38
+Requires:	libpeas-gtk >= 1.38
+%else
 Requires:	libpeas >= 0.7.4
 Requires:	libpeas-gtk >= 0.7.4
+%endif
 %{?with_rsvg:Requires:	librsvg >= 2.36.2}
 Requires:	shared-mime-info >= 0.50
 Requires:	xapps-libs >= 2.5.0
@@ -80,8 +94,13 @@ Requires:	libjpeg-devel >= 8
 Requires:	glib2-devel >= 1:2.38.0
 Requires:	gtk+3-devel >= 3.0
 Requires:	lcms2-devel >= 2
+%if %{with gir2}
+Requires:	libpeas-devel >= 1.38
+Requires:	libpeas-gtk-devel >= 1.38
+%else
 Requires:	libpeas-devel >= 0.7.4
 Requires:	libpeas-gtk-devel >= 0.7.4
+%endif
 %{?with_librsvg:Requires:	librsvg-devel >= 2.36.2}
 Requires:	xorg-lib-libX11-devel
 Requires:	xapps-devel >= 2.5.0
@@ -108,6 +127,9 @@ Dokumentacja API Xviewer.
 
 %prep
 %setup -q
+%if %{with gir2}
+%patch -P0 -p1
+%endif
 
 %build
 %meson \

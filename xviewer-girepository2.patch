@@ -1,0 +1,75 @@
+--- xviewer-3.4.16/src/xviewer-plugin-engine.c.orig	2026-01-08 17:33:18.000000000 +0100
++++ xviewer-3.4.16/src/xviewer-plugin-engine.c	2026-04-02 20:49:40.242800631 +0200
+@@ -34,7 +34,7 @@
+ #include <glib/gi18n.h>
+ #include <glib.h>
+ #include <gio/gio.h>
+-#include <girepository.h>
++#include <girepository/girepository.h>
+ 
+ #define XVIEWER_PLUGIN_DATA_DIR XVIEWER_DATA_DIR G_DIR_SEPARATOR_S "plugins"
+ 
+@@ -84,9 +84,17 @@ xviewer_plugin_engine_new (void)
+ 	gchar *typelib_path;
+ 	const gchar * const * system_data_dirs;
+ 	GError *error = NULL;
++	GIRepository *repo = gi_repository_dup_default ();
++
++	repo = gi_repository_dup_default ();
++	if (repo == NULL)
++	{
++		g_warning ("Could not get GI repository");
++		return NULL;
++	}
+ 
+ 	/* This should be moved to libpeas */
+-	if (g_irepository_require (g_irepository_get_default (),
++	if (gi_repository_require (repo,
+ 				   "Peas", "1.0", 0, &error) == NULL)
+ 	{
+ 		g_warning ("Error loading Peas typelib: %s\n",
+@@ -95,7 +103,7 @@ xviewer_plugin_engine_new (void)
+ 	}
+ 
+ 
+-	if (g_irepository_require (g_irepository_get_default (),
++	if (gi_repository_require (repo,
+ 				   "PeasGtk", "1.0", 0, &error) == NULL)
+ 	{
+ 		g_warning ("Error loading PeasGtk typelib: %s\n",
+@@ -105,13 +113,14 @@ xviewer_plugin_engine_new (void)
+ 
+ 	typelib_path = g_build_filename (LIBDIR, "xviewer", "girepository-1.0", NULL);
+ 
+-	if (g_irepository_require_private (g_irepository_get_default (), typelib_path,
++	if (gi_repository_require_private (repo, typelib_path,
+ 					   "Xviewer", "3.0", 0, &error) == NULL)
+ 	{
+ 		g_warning ("Error loading Xviewer typelib: %s\n",
+ 			   error->message);
+ 		g_clear_error (&error);
+ 	}
++	g_clear_object (&repo);
+ 
+ 	engine = XVIEWER_PLUGIN_ENGINE (g_object_new (XVIEWER_TYPE_PLUGIN_ENGINE,
+ 						  NULL));
+--- xviewer-3.4.16/src/main.c.orig	2026-01-08 17:33:18.000000000 +0100
++++ xviewer-3.4.16/src/main.c	2026-04-02 22:10:22.696566806 +0200
+@@ -27,7 +27,7 @@
+ #include "config.h"
+ #endif
+ #ifdef HAVE_INTROSPECTION
+-#include <girepository.h>
++#include <girepository/girepository.h>
+ #endif
+ 
+ #include "xviewer-application.h"
+@@ -102,7 +102,7 @@ main (int argc, char **argv)
+ 	 * Using gtk_get_option_group here initializes gtk during parsing */
+ 	g_option_context_add_group (ctx, gtk_get_option_group (FALSE));
+ #ifdef HAVE_INTROSPECTION
+-	g_option_context_add_group (ctx, g_irepository_get_option_group ());
++	g_option_context_add_group (ctx, gi_repository_get_option_group ());
+ #endif
+ 
+ 	if (!g_option_context_parse (ctx, &argc, &argv, &error)) {
